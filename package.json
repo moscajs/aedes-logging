@@ -1,0 +1,37 @@
+{
+  "name": "aedes-logging",
+  "version": "0.0.1",
+  "description": "Logging module for Aedes, based on Pino",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcollina/aedes-logging.git"
+  },
+  "keywords": [
+    "aedes",
+    "mqtt",
+    "broker",
+    "logging",
+    "pino"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mcollina/aedes-logging/issues"
+  },
+  "homepage": "https://github.com/mcollina/aedes-logging#readme",
+  "devDependencies": {
+    "aedes": "^0.16.1",
+    "flush-write-stream": "^1.0.0",
+    "mqtt": "^1.10.0",
+    "split2": "^2.0.1",
+    "standard": "^6.0.8",
+    "tap": "^5.7.1"
+  },
+  "dependencies": {
+    "pino": "^2.2.0"
+  }
+}
