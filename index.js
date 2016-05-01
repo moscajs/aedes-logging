@@ -32,6 +32,10 @@ function logging (opts) {
     client.logger.info('connected')
   })
 
+  instance.on('clientDisconnect', function (client) {
+    client.logger.info('disconnected')
+  })
+
   instance.on('subscribe', function (subscriptions, client) {
     client.logger.info({
       subscriptions: subscriptions

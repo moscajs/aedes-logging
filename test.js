@@ -53,16 +53,20 @@ test('logs when the server is started', function (t) {
 })
 
 test('logs when a connection happens', function (t) {
-  t.plan(6)
+  t.plan(9)
 
   var client
   var lines = 0
   var dest = sink(function (line, enc, cb) {
     t.pass('line is emitted')
-    if (lines++ === 1) {
-      t.equal(line.msg, 'connected', 'msg matches')
+    if (lines === 1) {
+      t.equal(line.msg, 'connected', 'connected msg matches')
+      t.equal(line.client.id, client.options.clientId, 'client id matches')
+    } else if (lines === 2) {
+      t.equal(line.msg, 'disconnected', 'disconnected msg matches')
       t.equal(line.client.id, client.options.clientId, 'client id matches')
     }
+    lines++
     cb()
   })
   startServer(dest, function (err, server, instance) {
@@ -82,7 +86,7 @@ test('logs when a connection happens', function (t) {
 })
 
 test('logs when a subscription happens', function (t) {
-  t.plan(8)
+  t.plan(9)
 
   var client
   var lines = 0
