@@ -8,14 +8,19 @@ var net = require('net')
 var mqtt = require('mqtt')
 var split = require('split2')
 
-function startServer (stream, cb) {
+function startServer (stream, opts, cb) {
+  if (typeof opts === 'function') {
+    cb = opts
+    opts = {}
+  }
   var instance = aedes()
   var server = net.createServer(instance.handle)
 
   logging({
     instance: instance,
     stream: stream,
-    server: server
+    server: server,
+    messages: opts.messages
   })
 
   server.listen(0, function (err) {
@@ -52,7 +57,7 @@ test('logs when the server is started', function (t) {
   })
 })
 
-test('logs when a connection happens', function (t) {
+test('logs when a connection or disconnection happens', function (t) {
   t.plan(9)
 
   var client
@@ -109,6 +114,61 @@ test('logs when a subscription happens', function (t) {
       t.error(err)
       client.end()
     })
+    t.teardown(function (cb) {
+      server.close(cb)
+    })
+    t.teardown(function (cb) {
+      instance.close(cb)
+    })
+  })
+})
+
+test('logs when a packet is published', function (t) {
+  t.plan(4)
+
+  var client
+  var lines = 0
+  var dest = sink(function (line, enc, cb) {
+    if (lines++ === 2) {
+      t.equal(line.msg, 'published', 'msg matches')
+      t.equal(line.client.id, client.options.clientId, 'client id matches')
+      t.deepEqual(line.message, {
+        topic: 'hello',
+        qos: 0,
+        retain: false
+      }, 'subscriptions')
+    }
+    cb()
+  })
+  startServer(dest, function (err, server, instance) {
+    t.error(err)
+    client = mqtt.connect(server.address())
+    client.publish('hello', 'world')
+    t.teardown(function (cb) {
+      client.end()
+      server.close(cb)
+    })
+    t.teardown(function (cb) {
+      instance.close(cb)
+    })
+  })
+})
+
+test('avoid logging every published message with an option', function (t) {
+  t.plan(4)
+
+  var client
+  var dest = sink(function (line, enc, cb) {
+    t.notEqual(line.msg, 'published', 'msg matches')
+    cb()
+  })
+  startServer(dest, {
+    messages: false
+  }, function (err, server, instance) {
+    t.error(err)
+    client = mqtt.connect(server.address())
+    client.publish('hello', 'world')
+    client.end()
     t.teardown(function (cb) {
       server.close(cb)
     })

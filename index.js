@@ -42,7 +42,30 @@ function logging (opts) {
     }, 'subscribed')
   })
 
+  // default is true
+  if (opts.messages !== false) {
+    instance.on('publish', logPublish)
+  }
+
   return instance
+}
+
+function logPublish (publish, client) {
+  var logger = this.logger
+  var level = 'debug'
+
+  if (client) {
+    level = 'info'
+    logger = client.logger
+  }
+
+  logger[level]({
+    message: {
+      topic: publish.topic,
+      qos: publish.qos,
+      retain: publish.retain
+    }
+  }, 'published')
 }
 
 module.exports = logging
