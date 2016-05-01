@@ -42,6 +42,12 @@ function logging (opts) {
     }, 'subscribed')
   })
 
+  instance.on('unsubscribe', function (subscriptions, client) {
+    client.logger.info({
+      topics: subscriptions
+    }, 'unsubscribed')
+  })
+
   // default is true
   if (opts.messages !== false) {
     instance.on('publish', logPublish)

@@ -90,21 +90,26 @@ test('logs when a connection or disconnection happens', function (t) {
   })
 })
 
-test('logs when a subscription happens', function (t) {
-  t.plan(9)
+test('logs when a subscription and unsubscription happens', function (t) {
+  t.plan(13)
 
   var client
   var lines = 0
   var dest = sink(function (line, enc, cb) {
     t.pass('line is emitted')
-    if (lines++ === 2) {
+    if (lines === 2) {
       t.equal(line.msg, 'subscribed', 'msg matches')
       t.equal(line.client.id, client.options.clientId, 'client id matches')
       t.deepEqual(line.subscriptions, [{
         topic: 'hello',
         qos: 0
       }], 'subscriptions')
+    } else if (lines === 3) {
+      t.equal(line.msg, 'unsubscribed', 'msg matches')
+      t.equal(line.client.id, client.options.clientId, 'client id matches')
+      t.deepEqual(line.topics, ['hello'], 'subscriptions')
     }
+    lines++
     cb()
   })
   startServer(dest, function (err, server, instance) {
