@@ -80,3 +80,36 @@ test('logs when a connection happens', function (t) {
     })
   })
 })
+
+test('logs when a subscription happens', function (t) {
+  t.plan(8)
+
+  var client
+  var lines = 0
+  var dest = sink(function (line, enc, cb) {
+    t.pass('line is emitted')
+    if (lines++ === 2) {
+      t.equal(line.msg, 'subscribed', 'msg matches')
+      t.equal(line.client.id, client.options.clientId, 'client id matches')
+      t.deepEqual(line.subscriptions, [{
+        topic: 'hello',
+        qos: 0
+      }], 'subscriptions')
+    }
+    cb()
+  })
+  startServer(dest, function (err, server, instance) {
+    t.error(err)
+    client = mqtt.connect(server.address())
+    client.subscribe('hello', function (err) {
+      t.error(err)
+      client.end()
+    })
+    t.teardown(function (cb) {
+      server.close(cb)
+    })
+    t.teardown(function (cb) {
+      instance.close(cb)
+    })
+  })
+})

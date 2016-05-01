@@ -5,7 +5,11 @@ var pino = require('pino')
 function logging (opts) {
   opts = opts || {}
 
-  var logger = pino(opts.stream, opts)
+  var logger = pino(opts.stream, {
+    level: opts.level,
+    extreme: opts.extreme,
+    safe: opts.safe
+  })
   var instance = opts.instance
   var servers = opts.servers || opts.server && [opts.server] || []
 
@@ -26,6 +30,12 @@ function logging (opts) {
       }
     })
     client.logger.info('connected')
+  })
+
+  instance.on('subscribe', function (subscriptions, client) {
+    client.logger.info({
+      subscriptions: subscriptions
+    }, 'subscribed')
   })
 
   return instance
