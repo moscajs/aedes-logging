@@ -182,3 +182,35 @@ test('avoid logging every published message with an option', function (t) {
     })
   })
 })
+
+test('logs when an error on the server client object happens', function (t) {
+  t.plan(4)
+
+  var client
+  var lines = 0
+  var dest = sink(function (line, enc, cb) {
+    if (lines === 2) {
+      t.equal(line.msg, 'BOOM')
+      t.equal(line.level, 40)
+      t.equal(line.client.id, client.options.clientId, 'client id matches')
+    }
+    lines++
+    cb()
+  })
+  startServer(dest, function (err, server, instance) {
+    t.error(err)
+    client = mqtt.connect(server.address())
+    instance.on('client', function (ic) {
+      setImmediate(function () {
+        ic.emit('error', new Error('BOOM'))
+      })
+    })
+    t.teardown(function (cb) {
+      client.end()
+      server.close(cb)
+    })
+    t.teardown(function (cb) {
+      instance.close(cb)
+    })
+  })
+})

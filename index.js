@@ -48,6 +48,10 @@ function logging (opts) {
     }, 'unsubscribed')
   })
 
+  instance.on('clientError', function (client, err) {
+    client.logger.warn(err)
+  })
+
   // default is true
   if (opts.messages !== false) {
     instance.on('publish', logPublish)
