@@ -7,14 +7,20 @@ var logging = require('./')
 var net = require('net')
 var mqtt = require('mqtt')
 var split = require('split2')
+var tls = require('tls')
+var fs = require('fs')
+var path = require('path')
 
 function startServer (stream, opts, cb) {
   if (typeof opts === 'function') {
     cb = opts
     opts = {}
   }
+
+  opts.createServer = opts.createServer || net.createServer
+
   var instance = aedes()
-  var server = net.createServer(instance.handle)
+  var server = opts.createServer(instance.handle)
 
   logging({
     instance: instance,
@@ -212,5 +218,29 @@ test('logs when an error on the server client object happens', function (t) {
     t.teardown(function (cb) {
       instance.close(cb)
     })
+  })
+})
+
+test('logs when a TLS server is started', function (t) {
+  t.plan(6)
+
+  var server
+  var dest = sink(function (line, enc, cb) {
+    t.equal(line.msg, 'listening', 'message matches')
+    t.equal(line.port, server.address().port, 'port matches')
+    t.equal(line.protocol, 'tls', 'protocol matches')
+    cb()
+  })
+  server = startServer(dest, {
+    createServer: function (handle) {
+      return tls.createServer({
+        key: fs.readFileSync(path.join(__dirname, 'certs', 'key.pem')),
+        cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem'))
+      }, handle)
+    }
+  }, function (err, server, instance) {
+    t.error(err)
+    server.close(t.pass.bind(t, 'server closes'))
+    instance.close(t.pass.bind(t, 'instance closes'))
   })
 })

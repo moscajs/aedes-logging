@@ -18,7 +18,11 @@ function logging (opts) {
   servers.forEach(function (server) {
     server.on('listening', function () {
       var address = server.address()
-      address.protocol = 'tcp'
+      if (server.key && server.cert) {
+        address.protocol = 'tls'
+      } else {
+        address.protocol = 'tcp'
+      }
       logger.info(address, 'listening')
     })
   })
