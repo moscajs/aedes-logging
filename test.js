@@ -10,6 +10,9 @@ var split = require('split2')
 var tls = require('tls')
 var fs = require('fs')
 var path = require('path')
+var http = require('http')
+var https = require('https')
+var websocket = require('websocket-stream')
 
 function startServer (stream, opts, cb) {
   if (typeof opts === 'function') {
@@ -237,6 +240,59 @@ test('logs when a TLS server is started', function (t) {
         key: fs.readFileSync(path.join(__dirname, 'certs', 'key.pem')),
         cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem'))
       }, handle)
+    }
+  }, function (err, server, instance) {
+    t.error(err)
+    server.close(t.pass.bind(t, 'server closes'))
+    instance.close(t.pass.bind(t, 'instance closes'))
+  })
+})
+
+test('logs when an HTTP server is started', function (t) {
+  t.plan(6)
+
+  var server
+  var dest = sink(function (line, enc, cb) {
+    t.equal(line.msg, 'listening', 'message matches')
+    t.equal(line.port, server.address().port, 'port matches')
+    t.equal(line.protocol, 'http', 'protocol matches')
+    cb()
+  })
+  server = startServer(dest, {
+    createServer: function (handle) {
+      var server = http.createServer()
+      websocket.createServer({
+        server: server
+      }, handle)
+      return server
+    }
+  }, function (err, server, instance) {
+    t.error(err)
+    server.close(t.pass.bind(t, 'server closes'))
+    instance.close(t.pass.bind(t, 'instance closes'))
+  })
+})
+
+test('logs when an HTTPS server is started', function (t) {
+  t.plan(6)
+
+  var server
+  var dest = sink(function (line, enc, cb) {
+    t.equal(line.msg, 'listening', 'message matches')
+    t.equal(line.port, server.address().port, 'port matches')
+    t.equal(line.protocol, 'https', 'protocol matches')
+    cb()
+  })
+  server = startServer(dest, {
+    createServer: function (handle) {
+      var server = https.createServer({
+        key: fs.readFileSync(path.join(__dirname, 'certs', 'key.pem')),
+        cert: fs.readFileSync(path.join(__dirname, 'certs', 'cert.pem'))
+      })
+      websocket.createServer({
+        server: server
+      }, handle)
+      return server
     }
   }, function (err, server, instance) {
     t.error(err)
