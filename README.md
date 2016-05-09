@@ -1,4 +1,4 @@
-# aedes-logging
+# aedes-logging&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/aedes-logging.svg)](https://travis-ci.org/mcollina/aedes-logging)
 
 Logging module for [Aedes][aedes], based on [Pino](https://github.com/mcollina/pino).
 
