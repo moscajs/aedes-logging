@@ -1,6 +1,6 @@
 {
   "name": "aedes-logging",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Logging module for Aedes, based on Pino",
   "main": "index.js",
   "scripts": {
