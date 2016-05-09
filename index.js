@@ -5,6 +5,7 @@ var pino = require('pino')
 function logging (opts) {
   opts = opts || {}
 
+  opts.stream = opts.stream || process.stdout
   var logger = pino(opts.stream, {
     level: opts.level,
     extreme: opts.extreme,
