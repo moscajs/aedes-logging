@@ -13,7 +13,6 @@ var path = require('path')
 var http = require('http')
 var https = require('https')
 var websocket = require('websocket-stream')
-var generate = require('mqtt-packet').generate
 
 function startServer (stream, opts, cb) {
   if (typeof opts === 'function') {
