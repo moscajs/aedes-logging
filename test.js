@@ -13,6 +13,7 @@ var path = require('path')
 var http = require('http')
 var https = require('https')
 var websocket = require('websocket-stream')
+var generate = require('mqtt-packet').generate
 
 function startServer (stream, opts, cb) {
   if (typeof opts === 'function') {
@@ -298,5 +299,44 @@ test('logs when an HTTPS server is started', function (t) {
     t.error(err)
     server.close(t.pass.bind(t, 'server closes'))
     instance.close(t.pass.bind(t, 'instance closes'))
+  })
+})
+
+test('do not crash if a client does not issue a CONNECT', function (t) {
+  t.plan(6)
+
+  var client
+  var lines = 0
+  var dest = sink(function (line, enc, cb) {
+    if (lines === 1) {
+      t.pass('line is emitted')
+      t.equal(line.msg, 'cannot parse protocol id', 'disconnected msg matches')
+    }
+    lines++
+    cb()
+  })
+  startServer(dest, function (err, server, instance) {
+    t.error(err)
+    client = net.connect(server.address())
+    client.on('connect', function () {
+      t.pass('client connected')
+      // wrong MQTT message
+      client.write(new Buffer([
+        16, 8,
+        0, 15,
+        77, 81, 73, 115, 100, 112,
+        77, 81, 73, 115, 100, 112,
+        77, 81, 73, 115, 100, 112,
+        77, 81, 73, 115, 100, 112,
+        77, 81, 73, 115, 100, 112,
+        77, 81, 73, 115, 100, 112,
+        77, 81, 73, 115, 100, 112,
+        77, 81, 73, 115, 100, 112
+      ]))
+      client.on('close', function () {
+        server.close(t.pass.bind(t, 'server closes'))
+        instance.close(t.pass.bind(t, 'instance closes'))
+      })
+    })
   })
 })

@@ -24,11 +24,11 @@
   },
   "homepage": "https://github.com/mcollina/aedes-logging#readme",
   "devDependencies": {
-    "aedes": "^0.16.1",
+    "aedes": "^0.20.0",
     "flush-write-stream": "^1.0.0",
     "mqtt": "^1.10.0",
     "split2": "^2.0.1",
-    "standard": "^6.0.8",
+    "standard": "^7.0.0",
     "tap": "^5.7.1",
     "websocket-stream": "^3.1.0"
   },

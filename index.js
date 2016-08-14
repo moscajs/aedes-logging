@@ -42,7 +42,11 @@ function logging (opts) {
   })
 
   instance.on('clientDisconnect', function (client) {
-    client.logger.info('disconnected')
+    if (client.logger) {
+      client.logger.info('disconnected')
+    } else {
+      logger.warn('disconnect without connect')
+    }
   })
 
   instance.on('subscribe', function (subscriptions, client) {
@@ -58,7 +62,14 @@ function logging (opts) {
   })
 
   instance.on('clientError', function (client, err) {
-    client.logger.warn(err)
+    if (client.logger) {
+      client.logger.warn(err)
+    } else {
+      logger.warn({
+        client: client,
+        err: err
+      }, err.message)
+    }
   })
 
   // default is true
