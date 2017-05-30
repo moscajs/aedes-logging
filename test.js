@@ -25,12 +25,14 @@ function startServer (stream, opts, cb) {
 
   var instance = aedes()
   var server = opts.createServer(instance.handle)
+  var pinoOptions = opts.pinoOptions || {}
 
   logging({
     instance: instance,
     stream: stream,
     server: server,
-    messages: opts.messages
+    messages: opts.messages,
+    pinoOptions: pinoOptions
   })
 
   server.listen(0, function (err) {
@@ -338,5 +340,20 @@ test('do not crash if a client does not issue a CONNECT', function (t) {
         instance.close(t.pass.bind(t, 'instance closes'))
       })
     })
+  })
+})
+
+test('peno options working', function (t) {
+  t.plan(5)
+
+  var dest = sink(function (line, enc, cb) {
+    t.equal(line.name, 'test logger', 'set pino name property')
+    t.equal(line.time, undefined, 'disable pino timestamp property')
+    cb()
+  })
+  startServer(dest, {pinoOptions: {name: 'test logger', timestamp: false}}, function (err, server, instance) {
+    t.error(err)
+    server.close(t.pass.bind(t, 'server closes'))
+    instance.close(t.pass.bind(t, 'instance closes'))
   })
 })

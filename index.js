@@ -6,11 +6,7 @@ function logging (opts) {
   opts = opts || {}
 
   opts.stream = opts.stream || process.stdout
-  var logger = pino(opts.stream, {
-    level: opts.level,
-    extreme: opts.extreme,
-    safe: opts.safe
-  })
+  var logger = pino(opts.pinoOptions || {}, opts.stream)
   var instance = opts.instance
   var servers = opts.servers
 
