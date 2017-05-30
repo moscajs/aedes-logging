@@ -96,6 +96,7 @@ opts can contain:
   `servers`.
 * `instance`: the instance of [aedes][aedes]
 * `messages`: logs all the mqtt PUBLISH received, defaults `true`
+* `pinoOptions`: options specific to [Pino](https://github.com/pinojs/pino/blob/master/docs/API.md#parameters)
 
 ## License
 
