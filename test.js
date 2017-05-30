@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tap').test
 var aedes = require('aedes')
 var writeStream = require('flush-write-stream')
@@ -309,7 +310,7 @@ test('do not crash if a client does not issue a CONNECT', function (t) {
   var dest = sink(function (line, enc, cb) {
     if (lines === 1) {
       t.pass('line is emitted')
-      t.equal(line.msg, 'cannot parse protocol id', 'disconnected msg matches')
+      t.equal(line.msg, 'Cannot parse protocolId', 'disconnected msg matches')
     }
     lines++
     cb()
@@ -320,7 +321,7 @@ test('do not crash if a client does not issue a CONNECT', function (t) {
     client.on('connect', function () {
       t.pass('client connected')
       // wrong MQTT message
-      client.write(new Buffer([
+      client.write(Buffer.from([
         16, 8,
         0, 15,
         77, 81, 73, 115, 100, 112,

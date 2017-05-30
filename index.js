@@ -12,7 +12,15 @@ function logging (opts) {
     safe: opts.safe
   })
   var instance = opts.instance
-  var servers = opts.servers || opts.server && [opts.server] || []
+  var servers = opts.servers
+
+  if (!servers) {
+    if (opts.server) {
+      servers = [opts.server]
+    } else {
+      servers = []
+    }
+  }
 
   instance.logger = logger
 
